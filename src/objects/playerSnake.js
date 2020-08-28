@@ -7,30 +7,47 @@ export default class PlayerSnake extends Snake {
     /**
      * Player of the core snake for controls
      * @param  {Phaser.Scene} scene scene object
-     * @param  {String} spriteKey   Phaser sprite key
      * @param  {Number} x           coordinate
      * @param  {Number} y           coordinate
      */
-    constructor(scene, spriteKey, x, y) {
-        super(scene, spriteKey, x, y);
+    constructor(scene, x, y, name) {
+        super(scene, x, y, name);
         this.scene = scene;
 
-        this.pointer = this.scene.input.activePointer;
-        this.midX = this.scene.cameras.main.width / 2;
-        this.midY = this.scene.cameras.main.height / 2;
+        // this.pointer = this.scene.input.activePointer;
+        this.scene.input.setPollAlways();
+        this.scene.input.on('pointerdown', this.pointerdown, this);
+        this.scene.input.on('pointerup', this.pointerup, this)
+    }
 
-        this.scene.input.on('pointerdown', function (pointer) {
-            if (pointer.leftButtonDown()) {
-                this.speed = this.fastSpeed;
-                this.lighton = true;
-            }
-        }, this)
-        this.scene.input.on('pointerup', function (pointer) {
-            if (pointer.leftButtonReleased()) {
-                this.speed = this.slowSpeed;
-                this.lighton = false;
-            }
-        }, this)
+    pointerdown(pointer) {
+        if (pointer.leftButtonDown()) {
+            // if (this.slowTimer) {
+            //     clearInterval(this.slowTimer);
+            //     this.slowTimer = null;
+            // }
+            this.speed = this.fastSpeed;
+            this.lighton = true;
+        }
+    }
+
+    pointerup(pointer) {
+        if (pointer.leftButtonReleased()) {
+            // if (this.slowTimer) {
+            //     clearInterval(this.slowTimer);
+            //     this.slowTimer = null;
+            // }
+            // this.slowTimer = setInterval((t) => {
+            //     console.log('slow')
+            //     this.speed -= 10;
+            //     if (this.speed < this.slowSpeed) {
+            this.speed = this.slowSpeed;
+            this.lighton = false;
+            //         clearInterval(this.slowTimer);
+            //         this.slowTimer = null;
+            //     }
+            // }, 100);
+        }
     }
 
     /**
@@ -38,17 +55,27 @@ export default class PlayerSnake extends Snake {
      * can control where this snake goes
      */
     update() {
-        const mousePosX = this.pointer.x || 0;
-        const mousePosY = this.pointer.y || 0;
-        const angle = Phaser.Math.Angle.Between(this.midX, this.midY, mousePosX, mousePosY);
+        const headX = this.head.x;
+        const headY = this.head.y;
+        const mousePosX = this.scene.input.activePointer.worldX || 0;
+        const mousePosY = this.scene.input.activePointer.worldY || 0;
+        const angle = Phaser.Math.Angle.Between(headX, headY, mousePosX, mousePosY);
         let dif = angle - this.head.rotation;
         if (dif > Math.PI) dif -= 2 * Math.PI;
         else if (dif < -Math.PI) dif += 2 * Math.PI;
 
         this.head.setAngularVelocity(dif * this.rotationSpeed);
 
-        // console.log('x=' + this.head.x + ',y=' + this.head.y);
         //call the original snake update method
         super.update();
+    }
+
+    destroy() {
+        this.scene.input.off('pointerdown', this.pointerdown, this);
+        this.scene.input.off('pointerup', this.pointerup, this);
+        super.destroy();
+        // this.scene.scene.switch('gameover');
+        var player = this.scene.createSnake(this.scene.rand(this.scene.worldsize.width), this.scene.rand(this.scene.worldsize.height), PlayerSnake, 'player');
+        this.scene.cameras.main.startFollow(player.head);
     }
 }

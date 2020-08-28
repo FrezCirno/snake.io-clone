@@ -29,7 +29,7 @@ export default class Shadow {
         this.lightTintBright = 0xaa3333;
         this.lightTintDim = 0xdd3333;
 
-        for (const sec of this.snake.sectionGroup.children.entries) {
+        for (const sec of this.snake.sectionGroup.getChildren()) {
             this.add(sec.x, sec.y);
         }
     }
@@ -49,10 +49,10 @@ export default class Shadow {
     update() {
         let lastPos = null;
         for (let i = 0; i < this.snake.sectionGroup.getLength(); i++) {
-            let shadow = this.shadowGroup.children.entries[i];
+            let shadow = this.shadowGroup.getChildren()[i];
             var pos = {
-                x: this.snake.sectionGroup.children.entries[i].x,
-                y: this.snake.sectionGroup.children.entries[i].y
+                x: this.snake.sectionGroup.getChildren()[i].x,
+                y: this.snake.sectionGroup.getChildren()[i].y
             };
 
             //hide the shadow if the previous shadow is in the same position
@@ -80,8 +80,8 @@ export default class Shadow {
         }
         //make shadow dark
         else {
-            for (var i = 0; i < this.shadowGroup.children.entries.length; i++) {
-                var shadow = this.shadowGroup.children.entries[i];
+            for (var i = 0; i < this.shadowGroup.getChildren().length; i++) {
+                var shadow = this.shadowGroup.getChildren()[i];
                 shadow.tint = this.darkTint;
             }
         }
@@ -92,7 +92,7 @@ export default class Shadow {
      */
     setScale(scale) {
         this.scale = scale;
-        for (const shadow of this.shadowGroup.children.entries) {
+        for (const shadow of this.shadowGroup.getChildren()) {
             shadow.scale = scale;
         }
     }
@@ -101,8 +101,8 @@ export default class Shadow {
      */
     lightUp() {
         this.lightUpdateCount = 0;
-        for (var i = 0; i < this.shadowGroup.children.entries.length; i++) {
-            var shadow = this.shadowGroup.children.entries[i];
+        for (var i = 0; i < this.shadowGroup.getChildren().length; i++) {
+            var shadow = this.shadowGroup.getChildren()[i];
             if (shadow.naturalAlpha > 0) {
                 //create an alternating effect so shadow is not uniform
                 if ((i - this.lightStep) % this.maxLightStep === 0) {

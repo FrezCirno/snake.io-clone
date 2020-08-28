@@ -22,19 +22,19 @@ export default class Eye {
         this.blackCircle.scale = scale;
         this.blackCircle.depth = 9999;
 
-        this.pointer = this.scene.input.activePointer;
-        this.midX = this.scene.cameras.main.width / 2;
-        this.midY = this.scene.cameras.main.height / 2;
+        // this.pointer = this.scene.input.activePointer;
     }
     /**
      * Call from the update loop
      */
     update() {
-        const mousePosX = this.pointer.x || 0;
-        const mousePosY = this.pointer.y || 0;
-        const angle = Phaser.Math.Angle.Between(this.midX, this.midY, mousePosX, mousePosY);
+        const headX = this.head.x;
+        const headY = this.head.y;
+        const mousePosX = this.scene.input.activePointer.worldX || 0;
+        const mousePosY = this.scene.input.activePointer.worldY || 0;
+        const angle = Phaser.Math.Angle.Between(headX, headY, mousePosX, mousePosY);
 
-        const vwhite = this.head.body.velocity.clone().normalize();
+        const vwhite = new Phaser.Math.Vector2(Math.cos(this.head.rotation), Math.sin(this.head.rotation));
         const twhite = new Phaser.Math.Vector2(vwhite.y, -vwhite.x);
         const offw = vwhite.scale(this.yoff).add(twhite.scale(this.xoff)).scale(this.head.displayWidth / 2);
         this.whiteCircle.setPosition(this.head.x + offw.x, this.head.y + offw.y);

@@ -12,7 +12,7 @@ var config = {
   // width: window.innerWidth - 100,
   // height: window.innerHeight - 100,
   // zoom: 2,
-  // disableContextMenu: true,
+  disableContextMenu: true,
   physics: {
     default: 'arcade',
     arcade: {

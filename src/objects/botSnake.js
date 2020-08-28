@@ -5,12 +5,11 @@ export default class BotSnake extends Snake {
     /**
      * Bot extension of the core snake
      * @param  {Phaser.Scene} scene scene object
-     * @param  {String} spriteKey Phaser sprite key
      * @param  {Number} x         coordinate
      * @param  {Number} y         coordinate
      */
-    constructor(scene, spriteKey, x, y) {
-        super(scene, spriteKey, x, y)
+    constructor(scene, x, y, name) {
+        super(scene, x, y, name)
         this.name = 'bot';
         this.trend = 1;
     }
@@ -27,5 +26,11 @@ export default class BotSnake extends Snake {
         }
         this.head.body.setAngularVelocity(this.trend * this.rotationSpeed);
         super.update();
+    }
+
+    destroy() {
+        super.destroy();
+        this.scene.createSnake(this.scene.rand(this.scene.worldsize.width),
+            this.scene.rand(this.scene.worldsize.height), BotSnake, this.scene.randName());
     }
 }

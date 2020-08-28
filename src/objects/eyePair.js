@@ -22,23 +22,19 @@ export default class EyePair {
      * Call from snake update loop
      */
     update() {
-        for (let i = 0; i < this.eyes.length; i++) {
-            this.eyes[i].update();
-        }
+        this.eyes.forEach(eye => eye.update());
     }
     /**
      * Set the scale of the eyes
      * @param  {Number} scale new scale
      */
     setScale(scale) {
-        this.leftEye.setScale(scale);
-        this.rightEye.setScale(scale);
+        this.eyes.forEach(eye => eye.setScale(scale));
     }
     /**
      * Destroy this eye pair
      */
     destroy() {
-        this.leftEye.destroy();
-        this.rightEye.destroy();
+        this.eyes.forEach(eye => eye.destroy());
     }
 }

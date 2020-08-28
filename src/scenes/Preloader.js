@@ -31,10 +31,36 @@ export default class Preloader extends Phaser.Scene {
         this.load.image('eye-black', 'src/assets/eye-black.png');
 
         this.load.image('food', 'src/assets/hex.png');
+
+        // sprites, note: see free sprite atlas creation tool here https://www.leshylabs.com/apps/sstool/
+        this.load.atlas('sprites', 'src/assets/spritearray.png', 'src/assets/spritearray.json');
+
+        // font
+        this.load.bitmapFont('fontwhite', 'src/assets/fontwhite.png', 'src/assets/fontwhite.xml');
+
+        // audio
+        this.load.audio('coin', ['src/assets/coin.mp3', 'src/assets/coin.ogg']);
+        this.load.audio('bomb', ['src/assets/expl.mp3', 'src/assets/expl.ogg']);
+        this.load.audio('btn', ['src/assets/btn.mp3', 'src/assets/btn.ogg']);
     }
-    
-    create ()
-    {
+
+    create() {
+        this.anims.create({
+            key: 'cointurn',
+            frames: [
+                { key: 'sprites', frame: 'coin1' },
+                { key: 'sprites', frame: 'coin2' },
+                { key: 'sprites', frame: 'coin3' },
+                { key: 'sprites', frame: 'coin4' },
+                { key: 'sprites', frame: 'coin5' },
+                { key: 'sprites', frame: 'coin6' },
+                { key: 'sprites', frame: 'coin7' },
+                { key: 'sprites', frame: 'coin8' }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+
         this.scene.start('battle');
     }
 }

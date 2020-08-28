@@ -63,9 +63,6 @@ export default class Boot extends Phaser.Scene {
 
     onWindowResize() {
         // Resize game configs.
-        let longestSide = Math.max(window.innerWidth, window.innerHeight);
-        let zoom = 2 * Math.max(1, Math.floor(longestSide / window.maxSize));
-        this.game.config.zoom = zoom;
         let w = Math.ceil(window.innerWidth / zoom);
         let h = Math.ceil(window.innerHeight / zoom);
         this.game.renderer.resize(w, h, 1.0);

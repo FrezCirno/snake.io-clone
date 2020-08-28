@@ -16,8 +16,8 @@ export default class PlayerSnake extends Snake {
         this.scene = scene;
 
         this.pointer = this.scene.input.activePointer;
-        // this.midX = this.scene.cameras.main.width / 2;
-        // this.midY = this.scene.cameras.main.height / 2;
+        this.midX = this.scene.cameras.main.width / 2;
+        this.midY = this.scene.cameras.main.height / 2;
 
         this.scene.input.on('pointerdown', function (pointer) {
             if (pointer.leftButtonDown()) {
@@ -38,8 +38,6 @@ export default class PlayerSnake extends Snake {
      * can control where this snake goes
      */
     update() {
-        this.midX = this.scene.cameras.main.width / 2 || 0;
-        this.midY = this.scene.cameras.main.height / 2 || 0;
         const mousePosX = this.pointer.x || 0;
         const mousePosY = this.pointer.y || 0;
         const angle = Phaser.Math.Angle.Between(this.midX, this.midY, mousePosX, mousePosY);
@@ -49,6 +47,7 @@ export default class PlayerSnake extends Snake {
 
         this.head.setAngularVelocity(dif * this.rotationSpeed);
 
+        // console.log('x=' + this.head.x + ',y=' + this.head.y);
         //call the original snake update method
         super.update();
     }

@@ -15,7 +15,7 @@ export default class Battle extends Phaser.Scene {
         this.foodcount = 2000;
         this.botcount = 10;
 
-        this.cameras.main.setBackgroundColor('#444');
+        // this.cameras.main.setBackgroundColor('#444');
 
         // 填充背景 
         this.add.tileSprite(0, 0, this.worldsize.width, this.worldsize.height, 'background');

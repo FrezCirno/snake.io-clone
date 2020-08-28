@@ -1,7 +1,6 @@
 import 'phaser';
 import Shadow from './shadow';
 import EyePair from './eyePair';
-import Util from '../util'
 
 export default class Snake {
     /**
@@ -11,7 +10,7 @@ export default class Snake {
      * @param  {Number} x         coordinate
      * @param  {Number} y         coordinate
      */
-    constructor(scene, spriteKey, x, y) {
+    constructor(scene, spriteKey, x, y, name) {
         this.scene = scene;
 
         this.spriteKey = spriteKey;
@@ -23,6 +22,8 @@ export default class Snake {
         this.rotationSpeed = 150;
         this.distanceIndex = 27;
         this.speed = this.slowSpeed;
+        this.initLength = 6;
+
         this.preferredDistance = this.distanceIndex * this.scale;
 
         /** 蛇头每次update时的位置集合 */
@@ -31,20 +32,14 @@ export default class Snake {
         this.queuedSections = 0;
         this.loss = 0;
 
-        /** 蛇身节, 包括蛇头 */
+        // 蛇身节, 包括蛇头
         this.sectionGroup = this.scene.physics.add.group();
 
-        /** 蛇头 */
-        this.head = this.addSectionAtPosition(x, y, this.spriteKey);
-        this.headPath.push(new Phaser.Geom.Point(x, y));
-
-        //add sections behind the head
-        for (let i = 1; i <= 10; i++) {
-            let x = this.head.x;
-            let y = this.head.y;
+        for (let i = 0; i <= this.initLength - 1; i++) {
             this.addSectionAtPosition(x, y, this.spriteKey);
             this.headPath.push(new Phaser.Geom.Point(x, y));
         }
+        this.head = this.sectionGroup.getFirst(true);
 
         this.lastHeadPosition = new Phaser.Geom.Point(this.head.x, this.head.y);
 
@@ -72,8 +67,8 @@ export default class Snake {
             this.incrementSize(food.amount);
             this.scene.foodGroup.remove(food, true, true);
             if (this.scene.foodGroup.getLength() < this.scene.foodcount)
-                this.scene.createFood(Util.randomInt(-this.scene.worldsize.width / 2, this.scene.worldsize.width / 2),
-                    Util.randomInt(-this.scene.worldsize.height / 2, this.scene.worldsize.height / 2));
+                this.scene.createFood(this.scene.rand(this.scene.worldsize.width),
+                    this.scene.rand(this.scene.worldsize.height));
         }, null, this);
 
         //initialize the eyes
@@ -106,7 +101,9 @@ export default class Snake {
      */
     update() {
         // 蛇头沿着this.head.angle/rotation的方向前进
-        this.scene.physics.velocityFromAngle(this.head.angle, this.speed, this.head.body.velocity);
+        var velocity = this.scene.physics.velocityFromAngle(this.head.angle, this.speed);
+        this.head.body.velocity = velocity.scale(0.5);
+
 
         // 把路径上的最后一个节点移到最开头
         // 因为只是点的集合所以可以这么做
@@ -117,36 +114,37 @@ export default class Snake {
         // 放置蛇身
         var index = this.findNextPointIndex(0);
         var lastIndex = null;
-        this.sectionGroup.children.entries.forEach((sec) => {
-            sec.x = this.headPath[index].x;
-            sec.y = this.headPath[index].y;
-
-            //hide sections if they are at the same position
-            if (lastIndex && index == lastIndex) {
-                sec.alpha = 0;
-            }
-            else {
-                sec.alpha = 1;
-            }
-
-            lastIndex = index;
-            index = this.findNextPointIndex(index);
-        })
-        // for (let i = 1; i < sections.length; i++) {
-        //     sections[i].x = this.headPath[index].x;
-        //     sections[i].y = this.headPath[index].y;
+        // this.sectionGroup.children.entries.forEach((sec) => {
+        //     sec.x = this.headPath[index].x;
+        //     sec.y = this.headPath[index].y;
 
         //     //hide sections if they are at the same position
         //     if (lastIndex && index == lastIndex) {
-        //         sections[i].alpha = 0;
+        //         sec.alpha = 0;
         //     }
         //     else {
-        //         sections[i].alpha = 1;
+        //         sec.alpha = 1;
         //     }
 
         //     lastIndex = index;
         //     index = this.findNextPointIndex(index);
-        // }
+        // })
+        var sections = this.sectionGroup.children.entries;
+        for (let i = 1; i < sections.length; i++) {
+            sections[i].x = this.headPath[index].x;
+            sections[i].y = this.headPath[index].y;
+
+            //hide sections if they are at the same position
+            if (lastIndex && index == lastIndex) {
+                sections[i].alpha = 0;
+            }
+            else {
+                sections[i].alpha = 1;
+            }
+
+            lastIndex = index;
+            index = this.findNextPointIndex(index);
+        }
 
         // 如果index到头了, 说明headPath的长度不够, +1个
         if (index + 1 >= this.headPath.length) {
@@ -177,6 +175,7 @@ export default class Snake {
         //update the eyes and the shadow below the snake
         this.eyes.update();
         this.shadow.update();
+
     }
     /**
      * 从蛇头的路径点中选出最接近段距离的下一个路径点的下标
@@ -184,6 +183,11 @@ export default class Snake {
      * @return {Integer}              new index
      */
     findNextPointIndex(currentIndex) {
+        // var offset = 7;
+        // if (currentIndex + offset >= this.headPath.length) return this.headPath.length - 1;
+        // return currentIndex + offset;
+
+
         //we are trying to find a point at approximately this distance away
         //from the point before it, where the distance is the total length of
         //all the lines connecting the two points
@@ -194,7 +198,7 @@ export default class Snake {
         //starting from the given index of the function and continues until
         //this sum nears the preferred distance between two snake sections
 
-        for (var i = currentIndex; i + 1 < this.headPath.length && (dif === null || dif < 0); i++) {
+        for (var i = currentIndex; i + 1 < this.headPath.length && dif < 0; i++) {
             //get distance between next two points
             let dist = Phaser.Math.Distance.Between(this.headPath[i].x, this.headPath[i].y,
                 this.headPath[i + 1].x, this.headPath[i + 1].y);
@@ -203,7 +207,7 @@ export default class Snake {
             dif = len - this.preferredDistance;
         }
         // 至此, 到第i个节点的距离为len>=predis
-        // 边界情况: currentIndex为最后一个, prevDif===null, 返回不变
+        // 边界情况: 后面找不到可用的点了, prevDif===null, 返回不变
         if (prevDif === null || Math.abs(prevDif) > Math.abs(dif)) {
             return i;
         }
@@ -217,7 +221,7 @@ export default class Snake {
      */
     onCycleComplete() {
         const seclen = this.sectionGroup.getLength();
-        this.queuedSections -= seclen / 500;
+        this.queuedSections -= seclen > this.initLength ? seclen / 500 : 0;
 
         if (this.queuedSections >= 1) {
             let last = this.sectionGroup.getLast(true);
@@ -286,8 +290,8 @@ export default class Snake {
         // place food where snake was destroyed
         for (const sec of this.sectionGroup.children.entries) {
             this.scene.createFood(
-                sec.x + Util.randomInt(-10, 10),
-                sec.y + Util.randomInt(-10, 10)
+                sec.x + this.scene.rand(20),
+                sec.y + this.scene.rand(20)
             );
         }
 
@@ -306,10 +310,10 @@ export default class Snake {
         this.shadow.destroy();
 
         if (this.name == 'bot') {
-            this.scene.createBotSnake(Util.randomInt(-this.scene.worldsize.width / 2, this.scene.worldsize.width / 2),
-                Util.randomInt(-this.scene.worldsize.height / 2, this.scene.worldsize.height / 2));
+            this.scene.createBotSnake(this.scene.rand(this.scene.worldsize.width),
+                this.scene.rand(this.scene.worldsize.height));
         } else {
-            var player = this.scene.createBotSnake(Util.randomInt(-this.scene.worldsize.width / 2, this.scene.worldsize.width / 2), Util.randomInt(-this.scene.worldsize.height / 2, this.scene.worldsize.height / 2), 'circle', 'player');
+            var player = this.scene.createBotSnake(this.scene.rand(this.scene.worldsize.width), this.scene.rand(this.scene.worldsize.height), 'circle', 'player');
             this.scene.cameras.main.startFollow(player.head);
         }
     }

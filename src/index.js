@@ -1,25 +1,27 @@
 import 'phaser';
-import Battle from './battle';
+import Boot from './scenes/Boot';
+import Preloader from './scenes/Preloader';
+import Battle from './scenes/Battle';
 
-window.maxSize = 960;
-let longestSide = Math.max(window.innerWidth, window.innerHeight);
-let zoom = 2 * Math.max(1, Math.floor(longestSide / window.maxSize));
-
-window.game = new Phaser.Game({
-  type: Phaser.AUTO,
-  width: window.innerWidth / zoom,
-  height: window.innerHeight / zoom,
-  zoom: zoom,
-  scene: [Battle],
+const config = {
+  type: Phaser.WEBGL,
+  width: window.innerWidth - 100,
+  height: window.innerHeight - 100,
+  // zoom: 2,
+  disableContextMenu: true,
   physics: {
     default: 'arcade',
     arcade: {
-      // debug: true,
-      gravity: 0
-    },
-    matter: {
-      debug: true,
-      gravity: 0
+      debug: true
     }
-  }
-});
+  },
+  plugins: [
+  ],
+  scene: [
+    Boot,
+    Preloader,
+    Battle
+  ],
+}
+
+window.game = new Phaser.Game(config);

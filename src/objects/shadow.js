@@ -1,18 +1,20 @@
 import 'phaser'
+import Snake from './snake';
 
 export default class Shadow {
     /**
      * Shadow below snake
      * @param  {Phaser.Scene} scene scene object
-     * @param  {Array} sections Array of snake section sprites
+     * @param  {Snake} snake Array of snake section sprites
      * @param  {Number} scale    scale of the shadow
      */
-    constructor(scene, sections, scale) {
+    constructor(scene, snake, scale) {
         this.scene = scene;
-        this.sections = sections;
+        this.snake = snake;
         this.scale = scale;
+
         this.shadowGroup = this.scene.add.group();
-        this.shadows = [];
+
         this.isLightingUp = false;
 
         this.lightStep = 0;
@@ -26,6 +28,10 @@ export default class Shadow {
         this.darkTint = 0xaaaaaa;
         this.lightTintBright = 0xaa3333;
         this.lightTintDim = 0xdd3333;
+
+        for (const sec of this.snake.sectionGroup.children.entries) {
+            this.add(sec.x, sec.y);
+        }
     }
     /**
      * Add a new shadow at a position
@@ -34,22 +40,19 @@ export default class Shadow {
      */
     add(x, y) {
         var shadow = this.scene.add.sprite(x, y, "shadow");
-        this.scene.scene.
-            shadow.scale.setTo(this.scale);
-        shadow.anchor.set(0.5);
+        shadow.scale = this.scale;
         this.shadowGroup.add(shadow);
-        this.shadows.push(shadow);
     }
     /**
      * Call from the snake update loop
      */
     update() {
-        var lastPos = null;
-        for (var i = 0; i < this.sections.length; i++) {
-            var shadow = this.shadows[i];
+        let lastPos = null;
+        for (let i = 0; i < this.snake.sectionGroup.getLength(); i++) {
+            let shadow = this.shadowGroup.children.entries[i];
             var pos = {
-                x: this.sections[i].body.x,
-                y: this.sections[i].body.y
+                x: this.snake.sectionGroup.children.entries[i].x,
+                y: this.snake.sectionGroup.children.entries[i].y
             };
 
             //hide the shadow if the previous shadow is in the same position
@@ -62,14 +65,14 @@ export default class Shadow {
                 shadow.naturalAlpha = 1;
             }
             //place each shadow below a snake section
-            shadow.position.x = pos.x;
-            shadow.position.y = pos.y;
+            shadow.x = pos.x;
+            shadow.y = pos.y;
 
             lastPos = pos;
         }
 
         //light up shadow with bright tints
-        if (this.isLightingUp) {
+        if (this.snake.lighton) {
             this.lightUpdateCount++;
             if (this.lightUpdateCount >= this.updateLights) {
                 this.lightUp();
@@ -77,8 +80,8 @@ export default class Shadow {
         }
         //make shadow dark
         else {
-            for (var i = 0; i < this.shadows.length; i++) {
-                var shadow = this.shadows[i];
+            for (var i = 0; i < this.shadowGroup.children.entries.length; i++) {
+                var shadow = this.shadowGroup.children.entries[i];
                 shadow.tint = this.darkTint;
             }
         }
@@ -89,8 +92,8 @@ export default class Shadow {
      */
     setScale(scale) {
         this.scale = scale;
-        for (var i = 0; i < this.shadows.length; i++) {
-            this.shadows[i].scale.setTo(scale);
+        for (const shadow of this.shadowGroup.children.entries) {
+            shadow.scale = scale;
         }
     }
     /**
@@ -98,8 +101,8 @@ export default class Shadow {
      */
     lightUp() {
         this.lightUpdateCount = 0;
-        for (var i = 0; i < this.shadows.length; i++) {
-            var shadow = this.shadows[i];
+        for (var i = 0; i < this.shadowGroup.children.entries.length; i++) {
+            var shadow = this.shadowGroup.children.entries[i];
             if (shadow.naturalAlpha > 0) {
                 //create an alternating effect so shadow is not uniform
                 if ((i - this.lightStep) % this.maxLightStep === 0) {
@@ -120,8 +123,6 @@ export default class Shadow {
      * destroy the shadow
      */
     destroy() {
-        for (var i = this.shadows.length - 1; i >= 0; i--) {
-            this.shadows[i].destroy();
-        }
+        this.shadowGroup.destroy(true);
     }
 }

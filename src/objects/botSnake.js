@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import Snake from './snake';
-import Util from './util';
+import Util from '../util';
 
 export default class BotSnake extends Snake {
     /**
@@ -12,6 +12,7 @@ export default class BotSnake extends Snake {
      */
     constructor(scene, spriteKey, x, y) {
         super(scene, spriteKey, x, y)
+        this.name = 'bot';
         this.trend = 1;
     }
 

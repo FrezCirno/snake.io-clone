@@ -11,13 +11,12 @@ export default class Battle extends Phaser.Scene {
     rand(r) { return Phaser.Math.RND.integerInRange(-r / 2, r / 2); }
 
     create() {
-        this.worldsize = { width: 3000, height: 3000 };
-        this.foodcount = 500;
-        this.botcount = 5;
+        this.worldsize = { width: 5000, height: 5000 };
+        this.foodcount = 1000;
+        this.botcount = 20;
 
         // 填充背景 
         this.add.tileSprite(0, 0, this.worldsize.width, this.worldsize.height, 'background');
-        // this.physics.world.bac.setBackgroundColor(0xf0f0f0);
         this.physics.world.setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height);
 
         this.physics.world.on('worldbounds', function (body) {
@@ -34,15 +33,21 @@ export default class Battle extends Phaser.Scene {
         }
 
         //create player
-        var player = this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), PlayerSnake, 'player')
-        var cam = this.cameras.main;
-        cam.startFollow(player.head);
-        cam.setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height)
+        // var player = this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), PlayerSnake, 'player')
+        // this.cameras.main.startFollow(player.head)
+        //     .setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height)
 
         //create bots
         for (let i = 0; i < this.botcount; i++) {
             this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), BotSnake, this.randName());
         }
+
+        // 重新进入此scene时(说明gameover), 创建玩家
+        this.events.on('resume', () => {
+            var player = this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), PlayerSnake, 'player')
+            this.cameras.main.startFollow(player.head)
+                .setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height)
+        }, this)
     }
     /**
      * new snake

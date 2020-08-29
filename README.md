@@ -1,3 +1,12 @@
+
+
+音效
+3D
+模型
+光影效果
+游戏说明
+游戏设定
+
 # Phaser 3 Webpack Project Template
 
 A Phaser 3 project template with ES6 support via [Babel 7](https://babeljs.io/) and [Webpack 4](https://webpack.js.org/)

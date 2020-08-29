@@ -83,11 +83,9 @@ export default class Snake {
         this.shadow = new Shadow(this.scene, this, this.scale);
 
         // 标签
-        this.label = this.scene.add.text(this.head.x, this.head.y, name,
-            {
-                color: Phaser.Math.RND.integerInRange(0, 0xffffff),
-                align: 'center'
-            });
+        this.label = this.scene.add.text(this.head.x, this.head.y, name, {
+            color: Phaser.Math.RND.integerInRange(0, 0xffffff),
+        });
         this.label.setOrigin(0.5, 0.5)
         this.label.setDepth(this.sectionGroup.getLength())
 
@@ -125,12 +123,11 @@ export default class Snake {
         var velocity = this.scene.physics.velocityFromAngle(this.head.angle, this.speed);
         this.head.body.velocity = velocity.scale(0.5);
         this.label.x = this.head.x;
-        this.label.y = this.head.y - this.head.body.radius;
+        this.label.y = this.head.y - this.head.displayWidth;
 
         // 把路径上的最后一个节点移到最开头
         // 因为只是点的集合所以可以这么做
-        let point = this.headPath.pop();
-        point.setTo(this.head.x, this.head.y);
+        let point = this.headPath.pop().setTo(this.head.x, this.head.y);
         this.headPath.unshift(point);
 
         // 放置蛇身

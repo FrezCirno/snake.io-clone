@@ -1,16 +1,13 @@
 import 'phaser';
-import Boot from './scenes/Boot';
 import Preloader from './scenes/Preloader';
 import Battle from './scenes/Battle';
+import Start from './scenes/Start';
+import Help from './scenes/Help';
 
 var config = {
-  // type: Phaser.AUTO,
   type: Phaser.WEBGL,
-  width: 800,
-  height: 600,
-  // backgroundColor: '#006060',
-  // width: window.innerWidth - 100,
-  // height: window.innerHeight - 100,
+  width: window.innerWidth,
+  height: window.innerHeight,
   // zoom: 2,
   disableContextMenu: true,
   physics: {
@@ -19,13 +16,15 @@ var config = {
       // debug: true
     }
   },
-  // scale: {
-  //   mode: Phaser.Scale.FIT,
-  //   autoCenter: Phaser.Scale.CENTER_BOTH
-  // },
+  scale: {
+    mode: Phaser.Scale.ENVELOP,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
   scene: [
     Preloader,
-    Battle
+    Start,
+    Help,
+    Battle,
   ]
 }
 

@@ -26,8 +26,8 @@ export default class Shadow {
         //various tints that the shadow could have
         //since the image is white
         this.darkTint = 0xaaaaaa;
-        this.lightTintBright = 0xaa3333;
-        this.lightTintDim = 0xdd3333;
+        this.lightTintBright = 0x223333;
+        this.lightTintDim = 0x553333;
 
         for (const sec of this.snake.sectionGroup.getChildren()) {
             this.add(sec.x, sec.y);

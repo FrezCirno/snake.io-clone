@@ -74,8 +74,7 @@ export default class PlayerSnake extends Snake {
         this.scene.input.off('pointerdown', this.pointerdown, this);
         this.scene.input.off('pointerup', this.pointerup, this);
         super.destroy();
-        // this.scene.scene.switch('gameover');
-        var player = this.scene.createSnake(this.scene.rand(this.scene.worldsize.width), this.scene.rand(this.scene.worldsize.height), PlayerSnake, 'player');
-        this.scene.cameras.main.startFollow(player.head);
+        this.scene.cameras.main.startFollow(this.scene.snakes[0].head);
+        this.scene.scene.sendToBack('battle').run('start');
     }
 }

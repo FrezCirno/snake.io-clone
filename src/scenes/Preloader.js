@@ -1,4 +1,26 @@
 import 'phaser';
+import logo from '../assets/logo.png';
+import tile from '../assets/tile.png';
+import circle from '../assets/circle.png';
+import shadow from '../assets/white-shadow.png';
+import hex from '../assets/hex.png';
+import eye_white from '../assets/eye-white.png';
+import eye_black from '../assets/eye-black.png';
+import tiles from '../assets/tiles.png';
+import gamepaused from '../assets/gamepaused.png';
+import spritearray from '../assets/spritearray.png';
+import spritearrayjson from '../assets/spritearray.json';
+import fontwhite from '../assets/fontwhite.png';
+import fontwhitexml from '../assets/fontwhite.xml';
+import coinmp3 from '../assets/coin.mp3';
+import coinogg from '../assets/coin.ogg';
+import btnmp3 from '../assets/btn.mp3';
+import btnogg from '../assets/btn.ogg';
+import demo from '../assets/demo.png';
+import help_eat from '../assets/help_eat.png';
+import help_died from '../assets/help_died.png';
+import help_speedup from '../assets/help_speedup.png';
+
 
 export default class Preloader extends Phaser.Scene {
 
@@ -18,35 +40,37 @@ export default class Preloader extends Phaser.Scene {
             progress.destroy();
         }, this);
 
-        // Load assets here
+        // Load ../assets here
         // ...
-        this.load.image('tiles', 'src/assets/tiles.png');
-        this.load.image('gamepaused', 'src/assets/gamepaused.png');
+        this.load.image('logo', logo);
+        this.load.image('demo', demo);
+        this.load.image('background', tile);
+        this.load.image('circle', circle);
+        this.load.image('shadow', shadow);
+        this.load.image('food', hex);
+        this.load.image('eye-white', eye_white);
+        this.load.image('eye-black', eye_black);
 
-        this.load.image('circle', 'src/assets/circle.png');
-        this.load.image('shadow', 'src/assets/white-shadow.png');
-        this.load.image('background', 'src/assets/tile.png');
-
-        this.load.image('eye-white', 'src/assets/eye-white.png');
-        this.load.image('eye-black', 'src/assets/eye-black.png');
-
-        this.load.image('food', 'src/assets/hex.png');
+        this.load.image('tiles', tiles);
+        this.load.image('gamepaused', gamepaused);
+        this.load.image('help_eat', help_eat);
+        this.load.image('help_died', help_died);
+        this.load.image('help_speedup', help_speedup);
 
         // sprites, note: see free sprite atlas creation tool here https://www.leshylabs.com/apps/sstool/
-        this.load.atlas('sprites', 'src/assets/spritearray.png', 'src/assets/spritearray.json');
+        this.load.atlas('sprites', spritearray, spritearrayjson);
 
         // font
-        this.load.bitmapFont('fontwhite', 'src/assets/fontwhite.png', 'src/assets/fontwhite.xml');
+        this.load.bitmapFont('fontwhite', fontwhite, fontwhitexml);
 
         // audio
-        this.load.audio('coin', ['src/assets/coin.mp3', 'src/assets/coin.ogg']);
-        this.load.audio('bomb', ['src/assets/expl.mp3', 'src/assets/expl.ogg']);
-        this.load.audio('btn', ['src/assets/btn.mp3', 'src/assets/btn.ogg']);
+        this.load.audio('coin', [coinmp3, coinogg]);
+        this.load.audio('btn', [btnmp3, btnogg]);
     }
 
     create() {
         this.anims.create({
-            key: 'cointurn',
+            key: 'pikapika',
             frames: [
                 { key: 'sprites', frame: 'coin1' },
                 { key: 'sprites', frame: 'coin2' },
@@ -61,7 +85,7 @@ export default class Preloader extends Phaser.Scene {
             repeat: -1
         });
 
-        this.scene.start('battle');
+        this.scene.start('start');
     }
 }
 

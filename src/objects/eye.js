@@ -18,7 +18,7 @@ export default class Eye {
         this.whiteCircle.scale = scale;
         this.whiteCircle.depth = 9999;
 
-        this.blackCircle = this.scene.add.image(this.whiteCircle.x, this.whiteCircle.y, "eye-black");
+        this.blackCircle = this.scene.add.image(this.whiteCircle.x, this.whiteCircle.y, "eye-black").setInteractive();
         this.blackCircle.scale = scale;
         this.blackCircle.depth = 9999;
 

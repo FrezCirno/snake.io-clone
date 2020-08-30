@@ -71,10 +71,11 @@ export default class PlayerSnake extends Snake {
     }
 
     destroy() {
+        this.scene.cameras.main.startFollow(this.scene.physics.closest(this.head, this.others.map(other => other.getChildren()[0]._snake.head)));
         this.scene.input.off('pointerdown', this.pointerdown, this);
         this.scene.input.off('pointerup', this.pointerup, this);
         super.destroy();
-        this.scene.cameras.main.startFollow(this.scene.snakes[0].head);
+
         this.scene.scene.sendToBack('battle').run('start');
     }
 }

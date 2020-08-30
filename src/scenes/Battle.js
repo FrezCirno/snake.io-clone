@@ -5,19 +5,25 @@ import PlayerSnake from '../objects/playerSnake';
 export default class Battle extends Phaser.Scene {
 
     constructor() {
-        super({ key: 'battle' });
+        super({
+            key: 'battle',
+            scale: {
+                mode: Phaser.Scale.ENVELOP,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            }
+        });
     }
 
     rand(r) { return Phaser.Math.RND.integerInRange(-r / 2, r / 2); }
 
     create() {
-        this.worldsize = { width: 5000, height: 5000 };
+        this.worldsize = { x: 10000, y: 10000 };
         this.foodcount = 1000;
-        this.botcount = 20;
+        this.botcount = 30;
 
         // 填充背景 
-        this.add.tileSprite(0, 0, this.worldsize.width, this.worldsize.height, 'background');
-        this.physics.world.setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height);
+        this.add.tileSprite(0, 0, this.worldsize.x, this.worldsize.y, 'background');
+        this.physics.world.setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y);
 
         this.physics.world.on('worldbounds', function (body) {
             body.gameObject._snake.destroy();
@@ -29,31 +35,44 @@ export default class Battle extends Phaser.Scene {
         // 随机创建食物
         this.foodGroup = this.physics.add.group();
         for (let i = 0; i < this.foodcount; i++) {
-            this.createFood(this.rand(this.worldsize.width), this.rand(this.worldsize.height),);
+            this.createFood(this.rand(this.worldsize.x), this.rand(this.worldsize.y),);
         }
 
         //create player
-        // var player = this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), PlayerSnake, 'player')
+        // var player = this.createSnake(this.rand(this.worldsize.x), this.rand(this.worldsize.y), PlayerSnake, 'player')
         // this.cameras.main.startFollow(player.head)
-        //     .setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height)
+        //     .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
 
         //create bots
         for (let i = 0; i < this.botcount; i++) {
-            this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), BotSnake, this.randName());
+            this.createSnake(BotSnake, this.randName());
         }
+
+        // 跟随某个bot
+        this.cameras.main.startFollow(this.snakes[0].head)
 
         // 重新进入此scene时(说明gameover), 创建玩家
         this.events.on('resume', () => {
-            var player = this.createSnake(this.rand(this.worldsize.width), this.rand(this.worldsize.height), PlayerSnake, 'player')
-            this.cameras.main.startFollow(player.head)
-                .setBounds(-this.worldsize.width / 2, -this.worldsize.height / 2, this.worldsize.width, this.worldsize.height)
+            var player = this.createSnake(PlayerSnake, 'player')
+            this.cameras.main
+                .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
+                .startFollow(player.head)
         }, this)
     }
     /**
      * new snake
      */
-    createSnake(x, y, bot, name) {
-        let s = new bot(this, x, y, name);
+    createSnake(bot, name) {
+        var x, y;
+        while (1) {
+            x = this.rand(this.worldsize.x - 100)
+            y = this.rand(this.worldsize.y - 100)
+            var closest = this.physics.closest({ x, y }, this.snakes.reduce((res, snake) => res.concat(snake.sectionGroup.getChildren()), []))
+            if (!closest) break;
+            var dis = Phaser.Math.Distance.BetweenPoints(closest, { x, y })
+            if (dis > 100) break;
+        }
+        let s = new bot(this, x, y, name)
         return s;
     }
 
@@ -66,7 +85,16 @@ export default class Battle extends Phaser.Scene {
      */
     update() {
         //update game components
-        this.snakes.forEach(snake => snake.update());
+        for (let index = 0; index < this.snakes.length; index++) {
+            const snake = this.snakes[index];
+            snake.update();
+        }
+        if (this.snakes.length < this.botcount) {
+            this.createSnake(BotSnake, this.randName());
+        }
+        if (this.foodGroup.getLength() < this.foodcount) {
+            this.createFood(this.rand(this.worldsize.x), this.rand(this.worldsize.y));
+        }
     }
 
     /**

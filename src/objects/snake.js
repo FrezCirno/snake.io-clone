@@ -2,6 +2,8 @@ import 'phaser';
 import Shadow from './shadow';
 import EyePair from './eyePair';
 
+var globalkey = 0;
+
 export default class Snake {
     /**
      * Phaser snake
@@ -23,6 +25,10 @@ export default class Snake {
 
         this.preferredDistance = this.distanceIndex * this.scale;
 
+        // 全局key
+        this.globalkey = globalkey++;
+        // console.log(this.globalkey + ' created')
+
         // 蛇头每次update时的位置集合
         this.headPath = [];
 
@@ -35,6 +41,8 @@ export default class Snake {
             this.addSectionAtPosition(x, y, this.spriteKey); // 60x60
             this.headPath.push(new Phaser.Geom.Point(x, y));
         }
+        // console.log('with ' + this.headPath.length)
+
         this.head = this.sectionGroup.getFirst(true);
         this.lastHeadPosition = new Phaser.Geom.Point(this.head.x, this.head.y);
 
@@ -44,24 +52,25 @@ export default class Snake {
         this.collider.setAlpha(0)
         this.collider.scale = this.scale / 8
 
-        // 碰撞检测范围
+        // 碰撞检测范围, 是Group[]类型, 必须在前
         this.others = []
-        this.overlap = this.scene.physics.add.overlap(this.collider, this.others, function (collider, other) {
-            collider._snake.destroy();
-        }, null, this);
-
-        // 其他蛇的碰撞区域
         for (const snake of this.scene.snakes) {
             this.others.push(snake.sectionGroup);
             snake.others.push(this.sectionGroup);
         }
 
+        // 注册蛇, 必须在后
+        this.scene.snakes.push(this);
+
+        this.overlap = this.scene.physics.add.overlap(this.collider, this.others, function () {
+            // 防止碰到多节蛇身从而删除多次
+            if (!this.overlap.active) return;
+            this.destroy();
+        }, null, this);
+
         // 边界碰撞
         this.head.setCollideWorldBounds(true);
         this.head.body.onWorldBounds = true;
-
-        // 注册蛇
-        this.scene.snakes.push(this);
 
         // 食物收集
         this.collector = this.scene.physics.add.image(this.head.x, this.head.y, 'circle');
@@ -70,12 +79,10 @@ export default class Snake {
         this.collector.scale = this.scale;
         this.collector.setCircle(this.head.body.halfWidth * 1.2, -0.2 * this.head.body.halfWidth, -0.2 * this.head.body.halfWidth);
 
-        this.scene.physics.add.overlap(this.collector, this.scene.foodGroup, function (collector, food) {
+        this.foodOverlap = this.scene.physics.add.overlap(this.collector, this.scene.foodGroup, function (collector, food) {
+            // console.log(this.globalkey + ' eat')
             this.incrementSize(food.amount);
             this.scene.foodGroup.remove(food, true, true);
-            if (this.scene.foodGroup.getLength() < this.scene.foodcount)
-                this.scene.createFood(this.scene.rand(this.scene.worldsize.width),
-                    this.scene.rand(this.scene.worldsize.height));
         }, null, this);
 
         this.eyes = new EyePair(this.scene, this.head, this.scale);
@@ -86,33 +93,8 @@ export default class Snake {
         this.label = this.scene.add.text(this.head.x, this.head.y, name, {
             color: Phaser.Math.RND.integerInRange(0, 0xffffff),
         });
-        this.label.setOrigin(0.5, 0.5)
+        this.label.setOrigin(0.5, 1)
         this.label.setDepth(this.sectionGroup.getLength())
-
-    }
-    /**
-     * 添加新节
-     * @param  {Number} x coordinate
-     * @param  {Number} y coordinate
-     * @param  {String} secSpriteKey sprite key
-     * @return {Phaser.Physics.Arcade.Image}   new section
-     */
-    addSectionAtPosition(x, y, secSpriteKey = 'circle') {
-        // 初始化新节, 必须得是物理sprite, 否则无法检测overlay
-        var sec = this.scene.physics.add.image(x, y, secSpriteKey).setInteractive(); // 中心位置
-        sec._snake = this;
-        sec.scale = this.scale;
-        sec.tint = Phaser.Math.RND.realInRange(0, 0xffffff);
-        sec.setCircle(sec.body.halfWidth); // 以左上角为中心
-        this.sectionGroup.add(sec);
-        this.sectionGroup.setDepth(1 + this.sectionGroup.getLength(), -1);
-        this.label && this.label.setDepth(this.sectionGroup.getLength() + 2)
-        return sec;
-    }
-
-    randColor() {
-        const colors = [0xffff66, 0xff6600, 0x33cc33, 0x00ccff, 0xcc66ff]
-        return colors[Phaser.Math.RND.integerInRange(0, colors.length - 1)];
     }
 
     /**
@@ -120,13 +102,13 @@ export default class Snake {
      */
     update() {
         // 蛇头沿着this.head.angle/rotation的方向前进
-        var velocity = this.scene.physics.velocityFromAngle(this.head.angle, this.speed);
-        this.head.body.velocity = velocity.scale(0.5);
+        this.scene.physics.velocityFromAngle(this.head.angle, this.speed, this.head.body.velocity);
         this.label.x = this.head.x;
         this.label.y = this.head.y - this.head.displayWidth;
 
         // 把路径上的最后一个节点移到最开头
         // 因为只是点的集合所以可以这么做
+        // console.log(this.globalkey + ' update with ' + this.headPath.length)
         let point = this.headPath.pop().setTo(this.head.x, this.head.y);
         this.headPath.unshift(point);
 
@@ -142,6 +124,7 @@ export default class Snake {
             if (lastIndex && index == lastIndex) sections[i].alpha = 0;
             else sections[i].alpha = 1;
 
+            console.assert(index)
             lastIndex = index;
             index = this.findNextPointIndex(index);
         }
@@ -152,6 +135,7 @@ export default class Snake {
             this.headPath.push(new Phaser.Geom.Point(lastPos.x, lastPos.y));
         } else if (index < this.headPath.length) {
             this.headPath.splice(index);
+            console.assert(this.headPath.length)
         }
 
         // 检查需不需要增长
@@ -180,6 +164,65 @@ export default class Snake {
 
     }
     /**
+     * 碰到墙或者碰到别的蛇
+     */
+    destroy() {
+        // console.log(this.globalkey + ' died')
+
+        // place food where snake was destroyed
+        for (const sec of this.sectionGroup.getChildren()) {
+            if (Math.random() > 0.5) {
+                this.scene.createFood(
+                    sec.x + this.scene.rand(20),
+                    sec.y + this.scene.rand(20)
+                );
+            }
+        }
+
+        let index = this.scene.snakes.indexOf(this);
+        console.assert(index != -1)
+        if (index !== -1) this.scene.snakes.splice(index, 1); // 取消注册蛇
+        for (const snake of this.scene.snakes) {
+            let index = snake.others.indexOf(this.sectionGroup);
+            console.assert(index != -1)
+            if (index !== -1) snake.others.splice(index, 1);
+        }
+
+        this.head.destroy();
+        this.sectionGroup.destroy(true);
+        this.collider.destroy();
+        this.overlap.destroy();
+        this.collector.destroy();
+        this.foodOverlap.destroy();
+        this.eyes.destroy();
+        this.shadow.destroy();
+        this.label.destroy()
+    }
+    /**
+     * 添加新节
+     * @param  {Number} x coordinate
+     * @param  {Number} y coordinate
+     * @param  {String} secSpriteKey sprite key
+     * @return {Phaser.Physics.Arcade.Image}   new section
+     */
+    addSectionAtPosition(x, y, secSpriteKey = 'circle') {
+        // 初始化新节, 必须得是物理sprite, 否则无法检测overlay
+        var sec = this.scene.physics.add.image(x, y, secSpriteKey).setInteractive(); // 中心位置
+        sec._snake = this;
+        sec.scale = this.scale;
+        sec.tint = Phaser.Math.RND.realInRange(0, 0xffffff);
+        sec.setCircle(sec.body.halfWidth); // 以左上角为中心
+        this.sectionGroup.add(sec);
+        this.sectionGroup.setDepth(1 + this.sectionGroup.getLength(), -1);
+        this.label && this.label.setDepth(this.sectionGroup.getLength() + 2)
+        return sec;
+    }
+
+    randColor() {
+        const colors = [0xffff66, 0xff6600, 0x33cc33, 0x00ccff, 0xcc66ff]
+        return colors[Phaser.Math.RND.integerInRange(0, colors.length - 1)];
+    }
+    /**
      * 从蛇头的路径点中选出最接近段距离的下一个路径点的下标
      * @param  {Integer} currentIndex Index of the previous snake section
      * @return {Integer}              new index
@@ -202,15 +245,14 @@ export default class Snake {
 
         for (var i = currentIndex; i + 1 < this.headPath.length && diff < 0; i++) {
             //get distance between next two points
-            let dist = Phaser.Math.Distance.Between(this.headPath[i].x, this.headPath[i].y,
-                this.headPath[i + 1].x, this.headPath[i + 1].y);
+            let dist = Phaser.Math.Distance.BetweenPoints(this.headPath[i], this.headPath[i + 1]);
             nowLen += dist; // 距离=折线段长度之和
             lastDiff = diff;
             diff = nowLen - this.preferredDistance;
         }
-        // 至此, 到第i个节点的距离为len>=predis
-        // 边界情况: 后面找不到可用的点了, prevDif===null, 返回不变
-        if (lastDiff === null || Math.abs(lastDiff) > Math.abs(diff)) {
+        // |lastDiff| >= |diff|说明当前结果更优
+        // 边界情况: lastDiff===null说明headPath为空
+        if (lastDiff === null || Math.abs(lastDiff) >= Math.abs(diff)) {
             return i;
         }
         else {
@@ -289,33 +331,5 @@ export default class Snake {
      */
     incrementSize(amount) {
         this.queuedSections += amount;
-    }
-    /**
-     * Destroy the snake
-     */
-    destroy() {
-        // place food where snake was destroyed
-        for (const sec of this.sectionGroup.getChildren()) {
-            this.scene.createFood(
-                sec.x + this.scene.rand(20),
-                sec.y + this.scene.rand(20)
-            );
-        }
-
-        let index = this.scene.snakes.indexOf(this);
-        this.scene.snakes.splice(index, 1);
-
-        for (const snake of this.scene.snakes) {
-            let index = snake.others.indexOf(this.sectionGroup);
-            if (index > -1) snake.others.splice(index, 1);
-        }
-
-        this.sectionGroup.destroy(true);
-        this.overlap.destroy();
-        this.collector.destroy();
-        this.eyes.destroy();
-        this.shadow.destroy();
-        this.label.destroy()
-        this.collider.destroy();
     }
 }

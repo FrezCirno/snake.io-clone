@@ -14,18 +14,31 @@ export default class PlayerSnake extends Snake {
         super(scene, x, y, name);
         this.scene = scene;
 
-        // this.pointer = this.scene.input.activePointer;
         this.scene.input.setPollAlways();
         this.scene.input.on('pointerdown', this.pointerdown, this);
         this.scene.input.on('pointerup', this.pointerup, this)
+        this.onEat = () => this.scene.sound.play('eat');
+
+        // 左下角显示状态
+        this.status = this.scene.add.text(10, 10, "Your length: 6", { fontSize: 20, fontFamily: 'halogen' })
+            .setScrollFactor(0, 0)
+            .setTint(0)
+
+        var main = this.scene.cameras.main;
+        this.rank = this.scene.add.text(main.width - 170, 10, "Rank list", {})
+            .setScrollFactor(0, 0)
+            .setTint(0)
+            .setDepth(999)
+
+        // this.mini = this.scene.cameras.add(main.width - 200, main.height - 200, 200, 200)
+        // .setName("mini")
+        // .setBounds(0, 0, this.scene.worldsize.x, this.scene.worldsize.y)
+        // .setZoom(0.05)
+        // .startFollow(this.head)
     }
 
     pointerdown(pointer) {
         if (pointer.leftButtonDown()) {
-            // if (this.slowTimer) {
-            //     clearInterval(this.slowTimer);
-            //     this.slowTimer = null;
-            // }
             this.speed = this.fastSpeed;
             this.lighton = true;
         }
@@ -33,20 +46,8 @@ export default class PlayerSnake extends Snake {
 
     pointerup(pointer) {
         if (pointer.leftButtonReleased()) {
-            // if (this.slowTimer) {
-            //     clearInterval(this.slowTimer);
-            //     this.slowTimer = null;
-            // }
-            // this.slowTimer = setInterval((t) => {
-            //     console.log('slow')
-            //     this.speed -= 10;
-            //     if (this.speed < this.slowSpeed) {
             this.speed = this.slowSpeed;
             this.lighton = false;
-            //         clearInterval(this.slowTimer);
-            //         this.slowTimer = null;
-            //     }
-            // }, 100);
         }
     }
 
@@ -64,14 +65,32 @@ export default class PlayerSnake extends Snake {
         if (dif > Math.PI) dif -= 2 * Math.PI;
         else if (dif < -Math.PI) dif += 2 * Math.PI;
 
-        this.head.setAngularVelocity(dif * this.rotationSpeed);
+        this.head.setAngularVelocity(dif * this.rotationSpeed); // 不断调整角速度以达到平滑转弯的效果
+
+        this.status.setText('Your length: ' + this.sectionGroup.getLength())
+
+        var list = this.scene.snakes
+            .map(snake => ({ text: snake.label.text, size: snake.sectionGroup.getLength() }))
+            .sort((a, b) => a.size < b.size)
+            .map((snake, index) => Phaser.Utils.String.Pad(index + 1, 3, ' ', 1) +
+                '  ' + Phaser.Utils.String.Pad(snake.text, 10, ' ', 2) +
+                snake.size)
+
+        this.rank.setText([
+            '     Rank list',
+            ...list
+        ])
 
         //call the original snake update method
         super.update();
     }
 
     destroy() {
-        this.scene.cameras.main.startFollow(this.scene.physics.closest(this.head, this.others.map(other => other.getChildren()[0]._snake.head)));
+        this.scene.sound.play('death')
+        this.status.destroy();
+        this.rank.destroy();
+        var closest = this.scene.physics.closest(this.head, this.others.map(other => other.getChildren()[0]._snake.head))
+        if (closest) this.scene.cameras.main.startFollow(closest);
         this.scene.input.off('pointerdown', this.pointerdown, this);
         this.scene.input.off('pointerup', this.pointerup, this);
         super.destroy();

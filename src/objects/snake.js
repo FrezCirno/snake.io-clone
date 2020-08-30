@@ -16,8 +16,8 @@ export default class Snake {
 
         //various quantities that can be changed
         this.scale = 0.5;
-        this.slowSpeed = 170;
-        this.fastSpeed = 300;
+        this.slowSpeed = 150;
+        this.fastSpeed = 200;
         this.rotationSpeed = 150;
         this.distanceIndex = 17;
         this.speed = this.slowSpeed;
@@ -68,10 +68,6 @@ export default class Snake {
             this.destroy();
         }, null, this);
 
-        // 边界碰撞
-        this.head.setCollideWorldBounds(true);
-        this.head.body.onWorldBounds = true;
-
         // 食物收集
         this.collector = this.scene.physics.add.image(this.head.x, this.head.y, 'circle');
         this.collector.alpha = 0;
@@ -83,6 +79,7 @@ export default class Snake {
             // console.log(this.globalkey + ' eat')
             this.incrementSize(food.amount);
             this.scene.foodGroup.remove(food, true, true);
+            if (this.onEat) this.onEat();
         }, null, this);
 
         this.eyes = new EyePair(this.scene, this.head, this.scale);
@@ -149,7 +146,7 @@ export default class Snake {
             }
         }
         if (!found) {
-            this.lastHeadPosition.setTo(this.head.x, this.head.y);
+            this.lastHeadPosition.setTo(this.headPath[0].x, this.headPath[0].y);
             this.onCycleComplete();
         }
 
@@ -161,7 +158,6 @@ export default class Snake {
         this.shadow.update();
         this.collider.x = this.head.x + this.head.displayWidth * Math.cos(this.head.rotation) / 1.4
         this.collider.y = this.head.y + this.head.displayHeight * Math.sin(this.head.rotation) / 1.4
-
     }
     /**
      * 碰到墙或者碰到别的蛇
@@ -265,7 +261,9 @@ export default class Snake {
      */
     onCycleComplete() {
         const seclen = this.sectionGroup.getLength();
-        this.queuedSections -= seclen > this.initLength ? seclen / 500 : 0;
+        if (seclen < this.initLength) {
+            this.queuedSections -= (this.speed === this.fastSpeed ? seclen / 10 : seclen / 100);
+        }
 
         if (this.queuedSections >= 1) {
             let last = this.sectionGroup.getLast(true);

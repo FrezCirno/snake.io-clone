@@ -20,8 +20,13 @@ module.exports = {
         use: "raw-loader"
       },
       {
-        test: /\.(gif|png|jpe?g|svg|xml|mp3|ogg)$/i,
-        use: "file-loader"
+        test: /\.(gif|png|jpe?g|svg|xml|mp3|ogg|wav|ttf)$/i,
+        use: [{
+          loader: "file-loader",
+          // options: {
+          //   limit: 8192
+          // }
+        }]
       }
     ]
   },
@@ -34,7 +39,8 @@ module.exports = {
       WEBGL_RENDERER: JSON.stringify(true)
     }),
     new HtmlWebpackPlugin({
-      template: "./index.html"
+      title: 'Snake.io',
+      template: "./index.html",
     })
   ]
 };

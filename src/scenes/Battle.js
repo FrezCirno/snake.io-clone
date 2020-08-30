@@ -17,9 +17,15 @@ export default class Battle extends Phaser.Scene {
     rand(r) { return Phaser.Math.RND.integerInRange(-r / 2, r / 2); }
 
     create() {
-        this.worldsize = { x: 10000, y: 10000 };
-        this.foodcount = 1000;
-        this.botcount = 30;
+        if (0) {
+            this.worldsize = { x: 1000, y: 1000 };
+            this.foodcount = 500;
+            this.botcount = 10;
+        } else {
+            this.worldsize = { x: 5000, y: 5000 };
+            this.foodcount = 500;
+            this.botcount = 20;
+        }
 
         // 填充背景 
         this.add.tileSprite(0, 0, this.worldsize.x, this.worldsize.y, 'background');
@@ -38,11 +44,6 @@ export default class Battle extends Phaser.Scene {
             this.createFood(this.rand(this.worldsize.x), this.rand(this.worldsize.y),);
         }
 
-        //create player
-        // var player = this.createSnake(this.rand(this.worldsize.x), this.rand(this.worldsize.y), PlayerSnake, 'player')
-        // this.cameras.main.startFollow(player.head)
-        //     .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
-
         //create bots
         for (let i = 0; i < this.botcount; i++) {
             this.createSnake(BotSnake, this.randName());
@@ -53,10 +54,11 @@ export default class Battle extends Phaser.Scene {
 
         // 重新进入此scene时(说明gameover), 创建玩家
         this.events.on('resume', () => {
-            var player = this.createSnake(PlayerSnake, 'player')
+            var player = this.createSnake(PlayerSnake, prompt("Please enter your name", "name"))
             this.cameras.main
                 .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
                 .startFollow(player.head)
+                .setLerp(1, 1)
         }, this)
     }
     /**
@@ -73,11 +75,27 @@ export default class Battle extends Phaser.Scene {
             if (dis > 100) break;
         }
         let s = new bot(this, x, y, name)
+
+        s.head.setCollideWorldBounds(true);
+        s.head.body.onWorldBounds = true;
+
         return s;
     }
 
     randName() {
-        const names = ['Apple', 'Banana', 'Cat', 'Trump', 'Me', 'Sun', 'Snack', 'Snnke', 'Star']
+        const names = ['Apple', 'Banana', 'Cat', 'Trump',
+            'Me', 'Sun', 'Snack', 'Snnke',
+            'Star', 'Gabrielle', 'Wright',
+            'Owen', 'Ferguson', 'Maria', 'Knox',
+            'Sally', 'Randall', 'Kevin', 'Walker',
+            'Brandon', 'Morgan', 'Kimberly', 'Clark',
+            'Faith', 'Lee', 'Adrian', 'May',
+            'Adrian', 'Morgan', 'Connor', 'McGrath',
+            'Dylan', 'Bell', 'Jasmine', 'Cameron',
+            'Emma', 'Rees', 'Caroline', 'Walsh',
+            'Joshua', 'Stewart', 'Samantha', 'Forsyth',
+            'Brandon', 'Simpson', 'Alan', 'Burgess',
+            'Piers', 'Graham']
         return names[Phaser.Math.RND.integerInRange(0, names.length - 1)];
     }
     /**

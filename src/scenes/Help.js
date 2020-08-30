@@ -14,27 +14,33 @@ export default class Help extends Phaser.Scene {
 
     create() {
         var slides = []
-        var objset = []
         var current = 0
 
         this.cameras.main.setBackgroundColor(0xffffff);
 
         slides.push([
-            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_eat').setOrigin(1, 0.5),
-            this.add.bitmapText(this.game.config.width / 2, this.game.config.height / 2, 'fontwhite', 'Use your mouse to control the snake; \nIt\'ll be bigger when eating foods').setTint(0)
+            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_eat')
+                .setOrigin(1, 0.5),
+            this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'Use mouse to control the snake; \nIt\'ll be bigger when eating foods', { color: '#0', fontSize: 30, fontFamily: 'halogen' })
+                .setTint(0)
         ])
 
         slides.push([
-            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_speedup').setOrigin(1, 0.5),
-            this.add.bitmapText(this.game.config.width / 2, this.game.config.height / 2, 'fontwhite', 'Click left button to speed up').setTint(0)
+            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_speedup')
+                .setOrigin(1, 0.5),
+            this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'Click left button to speed up', { color: '#0', fontSize: 30, fontFamily: 'halogen' })
+                .setTint(0)
         ])
 
         slides.push([
-            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_died').setOrigin(1, 0.5),
-            this.add.bitmapText(this.game.config.width / 2, this.game.config.height / 2, 'fontwhite', 'If you stuck to others\' body;\nThen gameover').setTint(0)
+            this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_died')
+                .setOrigin(1, 0.5),
+            this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'If you stuck to others\' body\nThen gameover', { color: '#0', fontSize: 30, fontFamily: 'halogen' })
+                .setTint(0)
         ])
 
         this.input.on('pointerdown', () => {
+            this.sound.play('btn');
             slides[current].forEach(obj => obj.alpha = 0)
             if (++current >= slides.length) {
                 current = 0

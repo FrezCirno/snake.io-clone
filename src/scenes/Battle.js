@@ -19,7 +19,7 @@ export default class Battle extends Phaser.Scene {
     create() {
         if (0) {
             this.worldsize = { x: 1000, y: 1000 };
-            this.foodcount = 500;
+            this.foodcount = 100;
             this.botcount = 10;
         } else {
             this.worldsize = { x: 5000, y: 5000 };
@@ -51,15 +51,20 @@ export default class Battle extends Phaser.Scene {
 
         // 跟随某个bot
         this.cameras.main.startFollow(this.snakes[0].head)
+            .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
 
         // 重新进入此scene时(说明gameover), 创建玩家
         this.events.on('resume', () => {
-            var player = this.createSnake(PlayerSnake, prompt("Please enter your name", "name"))
+            var player = this.createSnake(PlayerSnake, prompt("Please enter your name", "player"))
             this.cameras.main
-                .setBounds(-this.worldsize.x / 2, -this.worldsize.y / 2, this.worldsize.x, this.worldsize.y)
                 .startFollow(player.head)
                 .setLerp(1, 1)
         }, this)
+
+        this.events.on('resize', () => {
+            this.game.config.width = window.innerWidth;
+            this.game.config.height = window.innerHeight;
+        })
     }
     /**
      * new snake

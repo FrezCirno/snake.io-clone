@@ -20,7 +20,7 @@ export default class PlayerSnake extends Snake {
         this.onEat = () => this.scene.sound.play('eat');
 
         // 左下角显示状态
-        this.status = this.scene.add.text(10, 10, "Your length: 6", { fontSize: 20, fontFamily: 'halogen' })
+        this.status = this.scene.add.text(10, 10, "Your length: 6", { fontSize: 18, fontFamily: 'halogen' })
             .setScrollFactor(0, 0)
             .setTint(0)
 
@@ -70,14 +70,12 @@ export default class PlayerSnake extends Snake {
         this.status.setText('Your length: ' + this.sectionGroup.getLength())
 
         var list = this.scene.snakes
-            .map(snake => ({ text: snake.label.text, size: snake.sectionGroup.getLength() }))
+            .map(snake => ({ text: snake.label.text, size: snake.sectionGroup.getLength(), snake }))
             .sort((a, b) => a.size < b.size)
-            .map((snake, index) => Phaser.Utils.String.Pad(index + 1, 3, ' ', 1) +
-                '  ' + Phaser.Utils.String.Pad(snake.text, 10, ' ', 2) +
-                snake.size)
+            .map((snake, index) => Phaser.Utils.String.Pad(index + 1, 3, ' ', 1) + '  ' + Phaser.Utils.String.Pad(snake.text, 10, ' ', 2) + snake.size)
 
         this.rank.setText([
-            '     Rank list',
+            '  #  Rank list',
             ...list
         ])
 
@@ -86,6 +84,8 @@ export default class PlayerSnake extends Snake {
     }
 
     destroy() {
+        var start = this.scene.scene.get('start')
+        start.best = Math.max(start.best || 0, this.sectionGroup.getLength())
         this.scene.sound.play('death')
         this.status.destroy();
         this.rank.destroy();

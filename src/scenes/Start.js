@@ -41,7 +41,18 @@ export default class Start extends Phaser.Scene {
             .on('pointerout', () => exit.setColor('#0'))
             .on('pointerdown', () => 0)
 
-        var watch = this.add.text(0, 0, 'Watch mode', { color: '#0', fontSize: 20, fontFamily: 'halogen' })
+        this.add.text(0, 0, 'Watch mode', { color: '#0', fontSize: 20, fontFamily: 'halogen' })
+
+        var best = this.add.text(this.game.config.width / 2, this.game.config.height / 2 - 80, 'Your best score is ' + this.best, { color: '#0', fontSize: 25, fontFamily: 'halogen' })
+            .setOrigin(0.5)
+        best.alpha = 0
+
+        this.events.on('wake', () => {
+            if (this.best) {
+                best.alpha = 1
+                best.setText('Your best score is ' + this.best)
+            }
+        }, this)
 
         // this.cameras.main.setBackgroundColor(#ffffff);
         this.scene.launch('battle')

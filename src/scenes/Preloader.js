@@ -1,13 +1,10 @@
 import 'phaser';
-// import logo from '../assets/logo.png';
 import tile from '../assets/tile.png';
 import circle from '../assets/circle.png';
 import shadow from '../assets/white-shadow.png';
 import hex from '../assets/hex.png';
 import eye_white from '../assets/eye-white.png';
 import eye_black from '../assets/eye-black.png';
-// import tiles from '../assets/tiles.png';
-// import gamepaused from '../assets/gamepaused.png';
 import eat from '../assets/eat.mp3';
 import btn from '../assets/btn.mp3';
 import death from '../assets/death.ogg';
@@ -15,7 +12,6 @@ import hover from '../assets/UI_SFX_Set/click5.wav';
 import help_eat from '../assets/help_eat.png';
 import help_died from '../assets/help_died.png';
 import help_speedup from '../assets/help_speedup.png';
-
 
 export default class Preloader extends Phaser.Scene {
 

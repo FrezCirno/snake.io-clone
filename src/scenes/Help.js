@@ -35,7 +35,7 @@ export default class Help extends Phaser.Scene {
         slides.push([
             this.add.image(this.game.config.width / 2 - 100, this.game.config.height / 2, 'help_died')
                 .setOrigin(1, 0.5),
-            this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'If you stuck to others\' body\nThen gameover', { color: '#0', fontSize: 30, fontFamily: 'halogen' })
+            this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'If you hit on others\' body or the wall\nThen gameover', { color: '#0', fontSize: 30, fontFamily: 'halogen' })
                 .setTint(0)
         ])
 
